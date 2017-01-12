@@ -9,6 +9,7 @@ using namespace std;
 void readMap(string filename);
 void printMap();
 vector<vector<int>> getCoords();
+void initialSolve(vector<vector<int>> coords);
 
 vector<vector<char>> maze;
 
@@ -21,22 +22,37 @@ int main()
 	printMap();
 	vector<vector<int>> coords;
 	coords = getCoords();
-
+	initialSolve(coords);
 }
 
 vector<vector<int>> getCoords()
 {
+	vector<vector<int>> coords;
 	for (int i = 0; i < maze.size(); i++)
 	{
 		for (int z = 0; z < maze[i].size(); z++)
-			if (maze[i][z] >= '0' || maze[i][z] <= '9')
+			if (maze[i][z] >= '0' && maze[i][z] <= '9')
 			{
-
+				if (maze[i][z] == '0')
+					coords.insert(coords.begin(), { maze[i][z], i, z });
+				else
+					coords.push_back({ maze[i][z], i, z});
+				cout << "x:" << i << " y:" << z << " character: " << maze[i][z] << endl;
 			}
-		std::cout << endl;
 	}
-
+	return coords;
 }
+
+void initialSolve(vector<vector<int>> coords)
+{
+	vector<int> distances;
+	for (int i = 0; i < coords.size(); i++)
+	{
+
+
+	}
+}
+
 
 void readMap(string filename)
 {

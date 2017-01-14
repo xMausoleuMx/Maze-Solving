@@ -2,17 +2,24 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
 
+struct coord{
+	int x;
+	int y;
+};
+
 void readMap(string filename);
 void printMap();
-vector<vector<int>> getCoords();
-void initialSolve(vector<vector<int>> coords);
-int pathTo(vector<int> start, vector<int> end, int type);
+vector<coord> getCoords();
+void initialSolve(vector<coord> coords);
+vector<coord> pathTo(coord start, coord end);
 
 vector<vector<char>> maze;
+vector<vector<char>> originalMaze;
 
 int main()
 {
@@ -20,44 +27,49 @@ int main()
 	std::cout << "Enter in the filename of the maze you want solved\n";
 	std::cin >> filename;
 	readMap(filename);
+	originalMaze = maze;
 	printMap();
-	vector<vector<int>> coords;
+	vector<coord> coords;
 	coords = getCoords();
 	initialSolve(coords);
 }
 
-vector<vector<int>> getCoords()
+vector<coord> getCoords()
 {
-	vector<vector<int>> coords;
+	vector<coord> coords;
+	coord holder;
 	for (int i = 0; i < maze.size(); i++)
 	{
 		for (int z = 0; z < maze[i].size(); z++)
 			if (maze[i][z] >= '0' && maze[i][z] <= '9')
 			{
+				holder.x = i;
+				holder.y = z;
 				if (maze[i][z] == '0')
-					coords.insert(coords.begin(), { maze[i][z], i, z });
+					coords.insert(coords.begin(), holder);
 				else
-					coords.push_back({ maze[i][z], i, z});
+					coords.push_back(holder);
 				cout << "x:" << i << " y:" << z << " character: " << maze[i][z] << endl;
 			}
 	}
 	return coords;
 }
 
-void initialSolve(vector<vector<int>> coords)
+void initialSolve(vector<coord> coords)
 {
 	vector<int> distances;
-	vector<vector<int>> bestOrder;
+	vector<coord> bestOrder;
 	bestOrder.push_back(coords[0]);
-	int minDistance = INT_MAX, holder = 0, smallest;
+	int minDistance = INT_MAX, smallest;
+	vector<coord> holder;
 	for (int i = 0; i < coords.size(); i++)
 	{
 		for (int z = i+1; z < coords.size(); z++)
 		{
-			holder = pathTo(coords[i], coords[z], 0);
-			if (holder < minDistance)
+			holder = pathTo(coords[i], coords[z]);
+			if (holder.size() < minDistance)
 			{
-				minDistance = holder;
+				minDistance = holder.size();
 				smallest = z;
 			}
 		}
@@ -93,21 +105,50 @@ void printMap()
 	}
 }
 
-int pathTo(vector<int> start, vector<int> end, int type)
+vector<coord> pathTo(coord start, coord end)
 {
-	int distances [] = {0,0,0,0};
-	if (start[1] == end[1] && start[2] == end[2])
-		return 0;
-	if ((start[1] + 1 < maze.size()) && (maze[start[1] + 1][start[2]] != '#'))
-		distances[0] = pathTo({ start[0], start[1] + 1, start[2] }, end, type);
-	else if ((start[2] + 1 <maze[0].size()) && (maze[start[1]][start[2]+1] != '#'))
-		distances[1] = pathTo({ start[0], start[1], start[2] + 1 }, end, type);
-	else if ((start[1] - 1 >= 0 ) && (maze[start[1] - 1][start[2]] != '#'))
-		distances[2] = pathTo({ start[0], start[1] - 1, start[2] }, end, type);
-	else if ((start[2] - 1 >= 0 ) && (maze[start[1]][start[2]-1] != '#'))
-		distances[3] = pathTo({ start[0], start[1], start[2] - 1 }, end, type);
+	std::cout << ".";
+	vector<coord> pathNorth, pathSouth, pathEast, pathWest;
+	if (start.x == end.x && start.y == end.y){
+		pathNorth.push_back(start);
+		return pathNorth;
+	}
+	if ((start.x + 1 < maze.size()) && (maze[start.x + 1][start.y] != '#')){
+		pathEast = pathTo({ start.x + 1, start.y }, end);
+		if (pathEast.size() != 0)
+			pathEast.insert(pathEast.begin(), start);
+		maze[start.x][start.y] = '#';
+	}
+	else if ((start.y + 1 < maze[0].size()) && (maze[start.x][start.y + 1] != '#')){
+		pathNorth = pathTo({ start.x, start.y + 1 }, end);
+		if (pathNorth.size() != 0)
+			pathNorth.insert(pathNorth.begin(), start);
+		maze[start.x][start.y] = '#';
+	}
+	else if ((start.x - 1 >= 0) && (maze[start.x - 1][start.y] != '#')){
+		pathWest = pathTo({ start.x - 1, start.y }, end);
+		if (pathWest.size() != 0)
+			pathWest.insert(pathWest.begin(), start);
+		maze[start.x][start.y] = '#';
+	}
+	else if ((start.y - 1 >= 0) && (maze[start.x][start.y - 1] != '#')){
+		pathSouth = pathTo({ start.x, start.y - 1 }, end);
+		if(pathSouth.size() != 0)
+			pathSouth.insert(pathSouth.begin(), start);
+		maze[start.x][start.y] = '#';
+	}
 	else
-		return -1;
-
-	if()
+		return pathNorth;
+	if (pathEast.size() > pathWest.size()){
+		if (pathNorth.size() > pathSouth.size())
+			return((pathSouth.size() > pathWest.size()) ? pathWest : pathSouth);
+		else
+			return((pathNorth.size() > pathWest.size()) ? pathWest : pathNorth);
+	}
+	else{
+		if (pathNorth.size() > pathSouth.size())
+			return((pathSouth.size() > pathEast.size()) ? pathEast : pathSouth);
+		else
+			return((pathNorth.size() > pathEast.size()) ? pathEast : pathNorth);
+	}
 }

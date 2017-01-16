@@ -77,6 +77,8 @@ void initialSolve(vector<coord> coords)
 		coords.insert(coords.begin()+i + 1, coords[smallest]);
 		coords.erase(coords.begin()+smallest+1);
 	}
+	for (int i = 0; i < bestOrder.size(); i++)
+		std::cout << bestOrder[i].x << bestOrder[i].y << endl;
 }
 
 
@@ -114,31 +116,36 @@ vector<coord> pathTo(coord start, coord end)
 		return pathNorth;
 	}
 	if ((start.x + 1 < maze.size()) && (maze[start.x + 1][start.y] != '#')){
+		maze[start.x][start.y] = '#';
 		pathEast = pathTo({ start.x + 1, start.y }, end);
 		if (pathEast.size() != 0)
 			pathEast.insert(pathEast.begin(), start);
-		maze[start.x][start.y] = '#';
+		
 	}
 	else if ((start.y + 1 < maze[0].size()) && (maze[start.x][start.y + 1] != '#')){
+		maze[start.x][start.y] = '#';
 		pathNorth = pathTo({ start.x, start.y + 1 }, end);
 		if (pathNorth.size() != 0)
 			pathNorth.insert(pathNorth.begin(), start);
-		maze[start.x][start.y] = '#';
+		
 	}
 	else if ((start.x - 1 >= 0) && (maze[start.x - 1][start.y] != '#')){
+		maze[start.x][start.y] = '#';
 		pathWest = pathTo({ start.x - 1, start.y }, end);
 		if (pathWest.size() != 0)
 			pathWest.insert(pathWest.begin(), start);
-		maze[start.x][start.y] = '#';
 	}
 	else if ((start.y - 1 >= 0) && (maze[start.x][start.y - 1] != '#')){
+		maze[start.x][start.y] = '#';
 		pathSouth = pathTo({ start.x, start.y - 1 }, end);
 		if(pathSouth.size() != 0)
 			pathSouth.insert(pathSouth.begin(), start);
-		maze[start.x][start.y] = '#';
 	}
 	else
 		return pathNorth;
+
+	if (maze[start.x][start.y] == '#');
+		maze[start.x][start.y] = '.';
 	if (pathEast.size() > pathWest.size()){
 		if (pathNorth.size() > pathSouth.size())
 			return((pathSouth.size() > pathWest.size()) ? pathWest : pathSouth);
